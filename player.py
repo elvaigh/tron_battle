@@ -5,15 +5,13 @@ Tron Battle player info.
 
 class PlayerInfo(object):
 
-    alive = True
-
-    def __init__(self, number, x0, y0, x1, y1):
+    def __init__(self, number):
         self.number = number
-        self.move(x0, y0, x1, y1)
+        self.is_alive = True
 
     def move(self, x0, y0, x1, y1):
         if x0 == -1:
-            self.alive = False
+            self.is_alive = False
         else:
             self.x0 = x0
             self.y0 = y0
@@ -23,3 +21,7 @@ class PlayerInfo(object):
     @property
     def head(self):
         return self.x1, self.y1
+
+    @property
+    def tail(self):
+        return self.x0, self.y0
