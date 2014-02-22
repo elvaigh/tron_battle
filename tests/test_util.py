@@ -3,11 +3,6 @@ Tests for the util module.
 """
 
 import pytest
-import sys
-import os
-
-bn = os.path.basename
-sys.path.append(bn(bn(__file__)))
 
 from util import TronGrid
 
