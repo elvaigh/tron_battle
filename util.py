@@ -54,15 +54,22 @@ class TronGrid(object):
                 self.grid[i] = dst
 
     def bfs_fill(self, value, origins, empty=0):
-        new_origins = []
-        for origin in origins:
-            for d in self.DIRECTIONS.values():
-                idx = origin + d
-                if self.grid[idx] == empty:
-                    self.grid[idx] = value
-                    new_origins.append(idx)
-        if new_origins:
-            self.bfs_fill(value, new_origins, empty)
+        directions = self.DIRECTIONS.values()
+        grid = self.grid
+
+        while origins:
+            new_origins = []
+            for origin in origins:
+                for d in directions:
+                    idx = origin + d
+                    if grid[idx] == empty:
+                        grid[idx] = value
+                        new_origins.append(idx)
+            origins = new_origins
+
+        # print self
+        # print new_origins
+        # raw_input()
 
 
 def test():
@@ -79,3 +86,17 @@ def test2():
         t[idx1] = t[idx2] = 1
     t.bfs_fill(42, [t.coords2index(5, 10)])
     return t
+
+
+def test3():
+    t = TronGrid()
+    for y in xrange(0, 19):
+        for x in range(1, 29, 2):
+            if x % 4 == 1:
+                idx = t.coords2index(x, y)
+            else:
+                idx = t.coords2index(x, 19 - y)
+            t[idx] = 1
+    t.bfs_fill(42, [t.coords2index(0, 0)])
+    return t
+
