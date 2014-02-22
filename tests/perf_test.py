@@ -10,7 +10,6 @@ ap = os.path.abspath
 sys.path.append(dn(dn(ap(__file__))))
 sys.path.append(dn(ap(__file__)))
 
-from util import TronGrid
 from test_util import tg, tg_box1
 
 
@@ -36,7 +35,7 @@ def timed(times):
 @timed(500)
 def bfs_fill1():
     """Fill an empty grid."""
-    t = TronGrid()
+    t = tg()
     t.bfs_fill(42, [t.coords2index(5, 10)])
     return t
 
@@ -44,7 +43,7 @@ def bfs_fill1():
 @timed(500)
 def bfs_fill2():
     """Fill the grid with two dividers."""
-    t = TronGrid()
+    t = tg()
     for y in xrange(0, 19):
         idx1 = t.coords2index(10, y)
         idx2 = t.coords2index(20, 19 - y)
@@ -56,7 +55,7 @@ def bfs_fill2():
 @timed(500)
 def bfs_fill3():
     """Fill a maze."""
-    t = TronGrid()
+    t = tg()
     for y in xrange(0, 19):
         for x in range(1, 29, 2):
             if x % 4 == 1:
@@ -71,7 +70,7 @@ def bfs_fill3():
 @timed(30)
 def replace600_100():
     """Replace a value that has 600 positions in the grid."""
-    t = TronGrid()
+    t = tg()
     for i in xrange(100):
         t.replace(i, i + 1)
     return t
@@ -80,7 +79,7 @@ def replace600_100():
 @timed(30)
 def replace1_100():
     """Replace a value that has 1 position in the grid."""
-    t = TronGrid()
+    t = tg()
     t[655] = 1
     for i in xrange(1, 101):
         t.replace(i, i + 1)
@@ -90,7 +89,7 @@ def replace1_100():
 @timed(50)
 def copy_100():
     """Copy the whole grid 100 times."""
-    t = TronGrid()
+    t = tg()
     for i in xrange(100):
         t1 = t.copy()
     return t1
@@ -118,10 +117,10 @@ def bfs_probe_limit10():
 
 
 if __name__ == '__main__':
-    # copy_100()
-    # replace1_100()
-    # replace100_100()
-    # bfs_fill1()
+    copy_100()
+    replace1_100()
+    replace600_100()
+    bfs_fill1()
     bfs_fill3()
     bfs_probe_empty()
     bfs_probe_box()

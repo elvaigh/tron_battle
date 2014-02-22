@@ -1,5 +1,5 @@
 """
-Utils for the Tron Battle.
+Grid -- the field of the Tron Battle.
 """
 
 from array import array

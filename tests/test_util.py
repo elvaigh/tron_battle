@@ -4,7 +4,7 @@ Tests for the util module.
 
 import pytest
 
-from util import TronGrid
+from grid import TronGrid
 
 
 @pytest.fixture
