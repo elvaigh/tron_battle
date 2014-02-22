@@ -19,9 +19,16 @@ class PlayerInfo(object):
             self.y1 = y1
 
     @property
+    def coords(self):
+        if self.is_alive:
+            return self.x0, self.y0, self.x1, self.y1
+        else:
+            return -1, -1, -1, -1
+
+    @property
     def head(self):
-        return self.x1, self.y1
+        return self.coords[2:]
 
     @property
     def tail(self):
-        return self.x0, self.y0
+        return self.coords[:2]

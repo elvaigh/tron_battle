@@ -8,7 +8,7 @@ perf_test:
 	python tests/perf_test.py
 
 clean:
-	rm -Rf build
+	rm -Rf build tron-log-*
 
 build:
 	mkdir build
