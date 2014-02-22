@@ -58,10 +58,14 @@ class TronGrid(object):
         return deepcopy(self)
 
     def __str__(self):
-        return '\n'.join(
-                ('{: >-4d} ' * 30).format(*self.grid[start:start + 30])
-                for start in range(0, 64 * 20, 64)
-        )
+        ret = []
+        for start in range(0, 64 * 20, 64):
+            cells = ['{: >-2d}'.format(cell) if cell else '  '
+                    for cell in self.grid[start:start + 30]]
+            ret.append(' '.join(cells))
+        ret = ['#' * len(ret[0])] + ret + ['#' * len(ret[0])]
+        ret = ['#' + l + '#' for l in ret]
+        return '\n'.join(ret)
 
     def __getitem__(self, idx):
         return self.grid[idx]
@@ -71,11 +75,11 @@ class TronGrid(object):
 
     @staticmethod
     def head_of(player_number):
-        return player_number + 4
+        return player_number + 8
 
     @staticmethod
     def body_of(player_number):
-        return player_number + 8
+        return player_number + 4
 
     @staticmethod
     def coords2index(x, y):
