@@ -6,6 +6,7 @@ import os
 import random
 import time
 import datetime
+from clint.textui import colored
 from subprocess import Popen, PIPE
 
 from grid import TronGrid
@@ -43,8 +44,12 @@ class PlayerProgram(PlayerInfo):
     def send_numbers(self, *numbers):
         """Send space-separated line of numbers to the program."""
         to_send = ' '.join(map(str, numbers))
-        self.process.stdin.write(to_send + '\n')
-        self.log('Sent {}'.format(to_send))
+        try:
+            self.process.stdin.write(to_send + '\n')
+            self.process.stdin.flush()
+            self.log('Sent {}'.format(to_send))
+        except IOError, err:
+            self.log('Error while sending: {}'.format(err))
 
     def send_game_info(self, player_count):
         """Send the opening line: player count and player number."""
@@ -60,12 +65,12 @@ class PlayerProgram(PlayerInfo):
         got = self.process.stdout.readline().strip()
         self.msg = got
         end = time.time()
-        step_time = end - start
+        step_time = (end - start) * 1000.0
         self.steps += 1
         self.total_step_time += step_time
         if step_time > self.max_step_time:
             self.max_step_time = step_time
-        self.log('Received {} (in {} secs)'.format(got, step_time))
+        self.log('Received {} (in {} ms)'.format(got, step_time))
         return got
 
     def check_stderr(self):
@@ -89,16 +94,18 @@ class TronServer(object):
         self.turn_count = 0
         self.players = {}
         self.open_log_file()
+        random.seed(time.time())
 
     def open_log_file(self):
         """Open the log file."""
-        self.log_filename = os.tempnam(os.getcwd(),
-                time.strftime('tron-log-%Y%m%d%H%M%S-'))
-        self.log_fp = open(self.log_filename, 'wt')
+        self.log_filename = os.path.join(os.getcwd(),
+                time.strftime('tron-log-%Y%m%d%H%M%S'))
+        self.log_fp = open(self.log_filename, 'at')
+        self.log('Opened log')
 
     def log(self, msg):
         """Write the message to the log."""
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = datetime.datetime.now().time().isoformat()
         self.log_fp.write('[{}] {}\n'.format(timestamp, msg))
 
     def find_empty_spot(self):
@@ -162,17 +169,50 @@ class TronServer(object):
 
     def draw_field(self):
         """Display the field on the screen."""
-        print self.grid
+        for i in xrange(20):
+            print
 
-    def run(self):
+        player_colors = [colored.red, colored.green, colored.yellow,
+                colored.blue]
+
+        def format_cell(c):
+            if c == 0: return ' '
+            if 8 <= c < 12: c -= 4
+            if 4 <= c < 8: c -= 4
+            if 0 <= c < 4:
+                return player_colors[c]('#').color_str
+            return ' '
+
+        print '#' * 32
+        for start in range(0, 20 * 64, 64):
+            print '#' + ''.join(map(format_cell, self.grid[start:start + 30]))\
+                    + '#'
+        print '#' * 32
+
+        for i, player in self.players.items():
+            color = player_colors[i]
+            if player.is_alive:
+                print color('{}:{} AVG:{:.2f} MAX:{:.2f} MSG:{}'.format(
+                    i, player.title, player.avg_step_time,
+                    player.max_step_time, player.msg))
+            else:
+                print color('{}:{} Dead at step {}'.format(
+                    i, player.title, player.steps))
+
+    def run(self, framerate=10):
         """Run the game displaying the field."""
+        time.sleep(0.1)  # let the players initialize
+        delay = 1.0 / framerate
         while len(self.alive_players) > 1:
+            start = time.time()
             self.play_turn()
             self.draw_field()
+            time.sleep(start + delay - time.time())
 
 
 if __name__ == '__main__':
     server = TronServer()
+    server.add_player('Wanderer', 'python ai_wanderer.py')
     server.add_player('Wanderer', 'python ai_wanderer.py')
     server.add_player('Wanderer', 'python ai_wanderer.py')
     server.run()

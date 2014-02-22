@@ -2,6 +2,8 @@
 Tron Battle client library. Basic code for talking to the server.
 """
 
+import sys
+
 from grid import TronGrid  # @include(grid.py)
 from player import PlayerInfo  # @include(player.py)
 
@@ -53,3 +55,4 @@ class TronClient(object):
             print self.handler(players_count=self.players_count,
                     my_number=self.my_number, players=self.players,
                     grid=self.grid)
+            sys.stdout.flush()
