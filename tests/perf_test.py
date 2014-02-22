@@ -25,8 +25,7 @@ def timed(times):
             for i in xrange(times):
                 function()
             end = time.time()
-            secs = end - start
-            msecs = secs * 1000.0
+            msecs = (end - start) * 1000.0
             once = msecs / times
             print TEMPLATE.format(name=function.__doc__ or function.__name__,
                     count=times, msecs=msecs, once=once)
