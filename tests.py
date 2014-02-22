@@ -30,3 +30,25 @@ def bfs_fill3():
             t[idx] = 1
     t.bfs_fill(42, [t.coords2index(0, 0)])
     return t
+
+
+def replace1_100():
+    t = TronGrid()
+    for i in xrange(100):
+        t.replace(i, i + 1)
+    return t
+
+
+def replace2_100():
+    t = TronGrid()
+    t[655] = 1
+    for i in xrange(1, 101):
+        t.replace(i, i + 1)
+    return t
+
+
+def copy_100():
+    t = TronGrid()
+    for i in xrange(100):
+        t1 = t.copy()
+    return t1

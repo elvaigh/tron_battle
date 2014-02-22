@@ -1,6 +1,7 @@
 # Utils for the Tron Battle
 
 from array import array
+from copy import deepcopy
 
 
 class TronGrid(object):
@@ -27,6 +28,9 @@ class TronGrid(object):
 
     def __init__(self):
         self.grid = array('h', ([0] * 30 + [-1] * 34) * 20 + [-1] * 128)
+
+    def copy(self):
+        return deepcopy(self)
 
     def __str__(self):
         return '\n'.join(
