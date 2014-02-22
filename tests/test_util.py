@@ -82,6 +82,16 @@ def test_bsf_probe_box1(tg_box1):
     assert res.values == {1}
 
 
+def test_bsf_probe_box1_limit(tg_box1):
+    res = tg_box1.bfs_probe(tg_box1.coords2index(15, 10), limit=3)
+
+    assert res.closest_obstacle_d is None
+    assert res.closest_obstacle is None
+    assert res.max_distance == 3
+    assert res.empty_count == 24
+    assert res.values == set()
+
+
 def test_bsf_probe_box1_in(tg_box1_in):
     res = tg_box1_in.bfs_probe(tg_box1_in.coords2index(15, 10))
 
