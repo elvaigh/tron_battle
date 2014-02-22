@@ -50,25 +50,25 @@ def test_bsf_probe_objs(tg):
 def tg_box1(tg):
     """Field with the tail of tron #1 going around the middle."""
     for x in xrange(5, 25):
-        tg.put(x, 5, 1)
-        tg.put(x, 15, 1)
+        tg.put(x, 5, tg.body_of(0))
+        tg.put(x, 15, tg.body_of(0))
     for y in xrange(5, 15):
-        tg.put(5, y, 1)
-        tg.put(25, y, 1)
+        tg.put(5, y, tg.body_of(0))
+        tg.put(25, y, tg.body_of(0))
     return tg
 
 
 @pytest.fixture
 def tg_box1_in(tg_box1):
-    """Field with the tron #1 in the middle inside of its own tail."""
-    tg_box1.put(6, 6, 5)
+    """Field with the tron #0 in the middle inside of its own tail."""
+    tg_box1.put(6, 6, tg_box1.head_of(0))
     return tg_box1
 
 
 @pytest.fixture
 def tg_box1_out(tg_box1):
-    """Field with the tron #1 in the middle just outside of its own tail."""
-    tg_box1.put(5, 4, 5)
+    """Field with the tron #0 in the middle just outside of its own tail."""
+    tg_box1.put(5, 4, tg_box1.head_of(0))
     return tg_box1
 
 
@@ -76,10 +76,10 @@ def test_bsf_probe_box1(tg_box1):
     res = tg_box1.bfs_probe(tg_box1.coords2index(15, 10))
 
     assert res.closest_obstacle_d == 5
-    assert res.closest_obstacle == 1
+    assert res.closest_obstacle == tg_box1.body_of(0)
     assert res.max_distance == 13
     assert res.empty_count == (9 * 19) - 1
-    assert res.values == {1}
+    assert res.values == {tg_box1.body_of(0)}
 
 
 def test_bsf_probe_box1_limit(tg_box1):
@@ -96,20 +96,20 @@ def test_bsf_probe_box1_in(tg_box1_in):
     res = tg_box1_in.bfs_probe(tg_box1_in.coords2index(15, 10))
 
     assert res.closest_obstacle_d == 5
-    assert res.closest_obstacle == 1
+    assert res.closest_obstacle == tg_box1_in.body_of(0)
     assert res.max_distance == 13
     assert res.empty_count == (9 * 19) - 2
-    assert res.values == {1, 5}
+    assert res.values == {tg_box1_in.body_of(0), tg_box1_in.head_of(0)}
 
 
 def test_bsf_probe_box1_out(tg_box1_out):
     res = tg_box1_out.bfs_probe(tg_box1_out.coords2index(15, 10))
 
     assert res.closest_obstacle_d == 5
-    assert res.closest_obstacle == 1
+    assert res.closest_obstacle == tg_box1_out.body_of(0)
     assert res.max_distance == 13
     assert res.empty_count == (9 * 19) - 1
-    assert res.values == {1}
+    assert res.values == {tg_box1_out.body_of(0)}
 
 
 def test_bfs_probe_pois(tg_box1):

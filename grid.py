@@ -70,6 +70,14 @@ class TronGrid(object):
         self.grid[idx] = value
 
     @staticmethod
+    def head_of(player_number):
+        return player_number + 4
+
+    @staticmethod
+    def body_of(player_number):
+        return player_number + 8
+
+    @staticmethod
     def coords2index(x, y):
         return x + (y << 6)
 

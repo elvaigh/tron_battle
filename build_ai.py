@@ -17,7 +17,7 @@ def read_file(filename):
     else:
         included.add(filename)
         with open(filename, 'rt') as fp:
-            return ['### {}'.format(filename)] + fp.readlines()
+            return ['## SRC:{}\n\n'.format(filename)] + fp.readlines()
 
 
 source, target = sys.argv[1:]
@@ -31,4 +31,4 @@ with open(target, 'wt') as fp:
         if inc == -1:
             fp.write(line)
         else:
-            lines = read_file(line[inc + 11].split(')')[0]) + lines
+            lines = read_file(line[inc + 11:].split(')')[0]) + lines

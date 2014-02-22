@@ -13,5 +13,5 @@ clean:
 build:
 	mkdir build
 
-build_ais: build
+build_ais: build build_ai.py
 	python build_ai.py ai_wanderer.py build/ai_wanderer.py

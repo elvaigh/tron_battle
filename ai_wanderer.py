@@ -11,8 +11,10 @@ def ai_wanderer(players_count, my_number, players, grid):
     pos = grid.coords2index(x, y)
 
     options = {}
-    for dir, offset in grid.DIRECTIONS.values():
-        pr = grid.bfs_probe(pos + offset, limit=5)
+    for dir, offset in grid.DIRECTIONS.items():
+        new_pos = pos + offset
+        if grid[new_pos] != 0: continue
+        pr = grid.bfs_probe(new_pos, limit=5)
         weight = pr.max_distance
         if weight > 0:
             if pr.closest_obstacle_d is not None:

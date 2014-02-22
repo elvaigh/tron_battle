@@ -28,26 +28,26 @@ class TronClient(object):
             if i not in self.players:
                 self.players[i] = PlayerInfo(i)
                 if x0 != -1:
-                    self.grid.put(x0, y0, i)
+                    self.grid.put(x0, y0, self.grid.body_of(i))
             else:
                 # replace old head with body
                 old_head = self.players[i].head
-                self.grid.put(old_head[0], old_head[1], i)
+                self.grid.put(old_head[0], old_head[1], self.grid.body_of(i))
 
             player = self.players[i]
             player.move(x0, y0, x1, y1)
 
             if player.is_alive:
-                self.grid.put(x1, y1, 4 + i)
+                self.grid.put(x1, y1, self.grid.head_of(i))
             else:
                 self.remove_player(i)
 
     def remove_player(self, i):
-        self.grid.replace(i, 0)
+        self.grid.replace(self.grid.body_of(i), 0)
 
     def run(self):
         while 1:
-            if self.players and not self.players[self.my_number].alive:
+            if self.players and not self.players[self.my_number].is_alive:
                 return
             self.handle_input()
             print self.handler(players_count=self.players_count,
