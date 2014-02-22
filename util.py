@@ -120,7 +120,7 @@ class TronGrid(object):
         If ``limit`` is specified, don't probe beyond that many steps.
         """
         directions = self.DIRECTIONS.values()
-        grid = copy(self.grid)  # This doesn't change the grid.
+        grid = copy(self.grid)  # This method doesn't change the grid.
         origins = [start_idx]
         steps = -1
         empty_count = 0
