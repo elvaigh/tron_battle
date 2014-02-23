@@ -8,7 +8,7 @@ perf_test:
 	python tests/perf_test.py
 
 clean:
-	rm -Rf build tron-log-* *.pyc
+	rm -Rf build tron-log-* `find . -name '*.pyc'`
 
 build:
 	mkdir build

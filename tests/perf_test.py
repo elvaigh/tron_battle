@@ -10,7 +10,7 @@ ap = os.path.abspath
 sys.path.append(dn(dn(ap(__file__))))
 sys.path.append(dn(ap(__file__)))
 
-from test_util import tg, tg_box1
+from test_grid import tg, tg_box1
 
 
 TEMPLATE = '{name} ({count} times): {msecs:.0f} ms ({once:.3f} ms on average)'
