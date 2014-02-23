@@ -212,7 +212,7 @@ class TronServer(object):
 
 if __name__ == '__main__':
     server = TronServer()
-    server.add_player('Wanderer', 'python ai_wanderer.py')
-    server.add_player('Wanderer', 'python ai_wanderer.py')
-    server.add_player('Wanderer', 'python ai_wanderer.py')
+    server.add_player('wanderer 2', 'python ai_wanderer.py 2')
+    server.add_player('wanderer 10', 'python ai_wanderer.py 10')
+    server.add_player('wanderer 30', 'python ai_wanderer.py 30')
     server.run()
