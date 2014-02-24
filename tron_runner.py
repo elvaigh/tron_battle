@@ -91,11 +91,12 @@ if __name__ == '__main__':
         renderer = MultigameRenderer()
         config.framerate = None
 
+    server = TronServer()
     with renderer as renderer:
         for i in xrange(config.games_number):
-            server = TronServer()
             runner = TronRunner(server, renderer, config.framerate)
             server.add_player('wanderer', 'python ai_wanderer.py')
             server.add_player('wanderer', 'python ai_wanderer.py -s 10 -o 10')
             server.add_player('wanderer', 'python ai_wanderer.py -o -100')
             runner.run()
+            server.reset()

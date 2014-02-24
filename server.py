@@ -119,11 +119,9 @@ class PlayerProgram(PlayerInfo):
 class TronServer(object):
 
     def __init__(self):
-        self.grid = TronGrid()
-        self.player_count = 0
-        self.turn_count = 0
         self.players = {}
         self.open_log_file()
+        self.reset()
         random.seed(time.time())
 
     def open_log_file(self):
@@ -132,6 +130,17 @@ class TronServer(object):
                 time.strftime('tron-log-%Y%m%d%H%M%S'))
         self.log_fp = open(self.log_filename, 'at')
         self.log('Opened log')
+
+    def reset(self):
+        """Reset the game."""
+        if self.players:
+            for player in self.alive_players:
+                player.die('Game finished.')
+        self.grid = TronGrid()
+        self.player_count = 0
+        self.turn_count = 0
+        self.players = {}
+        self.log('Initialized battle field.')
 
     def log(self, msg):
         """Write the message to the log."""
