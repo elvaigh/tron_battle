@@ -33,7 +33,6 @@ if __name__ == '__main__':
     with CursesRenderer() as renderer:
         server = TronServer()
         runner = TronRunner(server, renderer, 10)
-        server.add_player('wanderer 5', 'python ai_wanderer.py 5')
-        server.add_player('wanderer 15', 'python ai_wanderer.py 15')
-        server.add_player('wanderer 45', 'python ai_wanderer.py 45')
+        server.add_player('wanderer 1', 'python ai_wanderer.py 30 500 1500')
+        server.add_player('wanderer -1', 'python ai_wanderer.py 30 500 200')
         runner.run()
