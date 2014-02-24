@@ -6,7 +6,6 @@ import os
 import random
 import time
 import datetime
-from clint.textui import colored
 from subprocess import Popen, PIPE
 
 from grid import TronGrid
@@ -24,6 +23,7 @@ class PlayerProgram(PlayerInfo):
         self.title = title
         self.msg = ''
         self.server_log = server_log
+        self.points = []
         self.process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE,
                 stderr=PIPE)
 
@@ -32,6 +32,26 @@ class PlayerProgram(PlayerInfo):
         self.server_log('[Player {}:{}] {}'.format(self.number,
             self.title, msg))
 
+    def get_move(self, index):
+        """Return the move with a given number as a string.
+
+        :return: "UP", "DOWN", "LEFT", "RIGHT" or None.
+        """
+        try:
+            if index >= 0:
+                last = self.points[index + 1]
+                prev = self.points[index]
+            else:
+                last = self.points[index]
+                prev = self.points[index - 1]
+        except IndexError:
+            return None
+
+        last, prev = map(self.grid.coords2index, last, prev)
+        offset = last - prev
+        r_dir = {off: dir for dir, off in self.grid.DIRECTIONS.items()}
+        return r_dir.get(offset, None)
+
     @property
     def avg_step_time(self):
         return self.total_step_time / self.steps
@@ -39,6 +59,16 @@ class PlayerProgram(PlayerInfo):
     def move(self, x0, y0, x1, y1):
         """Add logging to moving."""
         PlayerInfo.move(self, x0, y0, x1, y1)
+
+        if self.points:
+            if self.points[-1] != (x1, y1):
+                self.points.append((x1, y1))
+        else:
+            if (x0, y0) == (x1, y1):
+                self.points = [(x1, y1)]
+            else:
+                self.points = [(x0, y0), (x1, y1)]
+
         self.log('New coordinates: {} {} {} {}'.format(x0, y0, x1, y1))
 
     def send_numbers(self, *numbers):
@@ -166,53 +196,3 @@ class TronServer(object):
         for player in self.alive_players:
             self.play_player_turn(player)
         self.log('Completed turn {}'.format(self.turn_count))
-
-    def draw_field(self):
-        """Display the field on the screen."""
-        for i in xrange(20):
-            print
-
-        player_colors = [colored.red, colored.green, colored.yellow,
-                colored.blue]
-
-        def format_cell(c):
-            if c == 0: return ' '
-            if 8 <= c < 12: c -= 4
-            if 4 <= c < 8: c -= 4
-            if 0 <= c < 4:
-                return player_colors[c]('#').color_str
-            return ' '
-
-        print '#' * 32
-        for start in range(0, 20 * 64, 64):
-            print '#' + ''.join(map(format_cell, self.grid[start:start + 30]))\
-                    + '#'
-        print '#' * 32
-
-        for i, player in self.players.items():
-            color = player_colors[i]
-            if player.is_alive:
-                print color('{}:{} AVG:{:.2f} MAX:{:.2f} MSG:{}'.format(
-                    i, player.title, player.avg_step_time,
-                    player.max_step_time, player.msg))
-            else:
-                print color('{}:{} Dead at step {}'.format(
-                    i, player.title, player.steps))
-
-    def run(self, framerate=10):
-        """Run the game displaying the field."""
-        time.sleep(0.1)  # let the players initialize
-        delay = 1.0 / framerate
-        while len(self.alive_players) > 1:
-            start = time.time()
-            self.play_turn()
-            self.draw_field()
-            time.sleep(start + delay - time.time())
-
-
-if __name__ == '__main__':
-    server = TronServer()
-    server.add_player('wanderer 2', 'python ai_wanderer.py 2')
-    server.add_player('wanderer 10', 'python ai_wanderer.py 10')
-    server.add_player('wanderer 30', 'python ai_wanderer.py 30')
-    server.run()
