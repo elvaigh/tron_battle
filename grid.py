@@ -169,6 +169,5 @@ class TronGrid(object):
                         pois_reached.add(idx)
                         pois_left.remove(idx)
             origins = new_origins
-        print obj2dist
 
         return ProbeResult(steps, empty_count, obj2dist, pois_reached)
