@@ -58,23 +58,38 @@ class MultigameRenderer(object):
 class TronRunner(object):
     """Run the tron battle using the server and renderer."""
 
-    def __init__(self, server, renderer, framerate=None):
+    def __init__(self, server, renderer, config):
         self.server = server
         self.renderer = renderer
-        self.framerate = framerate
+        self.framerate = config.framerate
+        self.games_number = config.games_number
+        self.players_file = config.players_file
+
+    def add_players(self):
+        """Add players from the config file."""
+        with open(self.players_file) as fp:
+            for line in fp:
+                line = line.strip()
+                if not line: continue
+                if line.startswith('#'): continue
+                title, command = line.split(':')
+                self.server.add_player(title.strip(), command.strip())
+
+        time.sleep(0.05)  # let the players initialize
 
     def run(self):
         """Run the game displaying the field."""
-        time.sleep(0.1)  # let the players initialize
-
-        while len(self.server.alive_players) > 1:
-            start = time.time()
-            self.server.play_turn()
-            self.renderer.render(self.server)
-            if self.framerate is not None:
-                remaining_delay = start + (1.0 / self.framerate) - time.time()
-                if remaining_delay > 0:
-                    time.sleep(remaining_delay)
+        for i in xrange(self.games_number):
+            self.add_players()
+            while len(self.server.alive_players) > 1:
+                start = time.time()
+                self.server.play_turn()
+                self.renderer.render(self.server)
+                if self.framerate is not None:
+                    delay = start + (1.0 / self.framerate) - time.time()
+                    if delay > 0:
+                        time.sleep(delay)
+            server.reset()
 
 
 if __name__ == '__main__':
@@ -83,6 +98,9 @@ if __name__ == '__main__':
             metavar='N', help='Number of games to run.')
     parser.add_argument('--framerate', '-f', type=int, default=7,
             metavar='N', help='Framerate for single game.')
+    parser.add_argument('--players-file', '-p', type=str,
+            default='players.conf', metavar='PLAYERS',
+            help='File with players configuration.')
     config = parser.parse_args()
 
     if config.games_number == 1:
@@ -93,10 +111,5 @@ if __name__ == '__main__':
 
     server = TronServer()
     with renderer as renderer:
-        for i in xrange(config.games_number):
-            runner = TronRunner(server, renderer, config.framerate)
-            server.add_player('wanderer', 'python ai_wanderer.py')
-            server.add_player('wanderer', 'python ai_wanderer.py -s 10 -o 10')
-            server.add_player('wanderer', 'python ai_wanderer.py -o -100')
-            runner.run()
-            server.reset()
+        runner = TronRunner(server, renderer, config)
+        runner.run()
