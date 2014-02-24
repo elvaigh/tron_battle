@@ -189,6 +189,11 @@ class TronServer(object):
         """Return the list of alive players."""
         return filter(lambda p: p.is_alive, self.players.values())
 
+    @property
+    def players_list(self):
+        """Return the players as a list."""
+        return [self.players[i] for i in xrange(len(self.players))]
+
     def play_turn(self):
         """Play one turn for all alive players."""
         self.turn_count += 1
