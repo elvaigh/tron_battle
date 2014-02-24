@@ -10,9 +10,28 @@ class CursesRenderer(object):
 
     def __enter__(self):
         self._init_curses()
+        self._init_charmap()
         self.screen.clear()
         self.screen.refresh()
         return self
+
+    def _init_charmap(self):
+        """Initialize the map of characters for drawing snakes."""
+        charmap = """
+            _U,_D,UU,DD:VLINE
+            _L,_R,LL,RR:HLINE
+            UL,RD:URCORNER
+            UR,LD:ULCORNER
+            DL,RU:LRCORNER
+            DR,LU:LLCORNER
+            U_,D_,L_,R_,__:DIAMOND
+        """
+        self.charmap = {}
+        for group in charmap.split():
+            if not group: continue
+            moves, charname = group.split(':')
+            for move in moves.split(','):
+                self.charmap[move] = getattr(curses, 'ACS_' + charname)
 
     def _init_curses(self):
         """Initialize colors."""
@@ -28,36 +47,50 @@ class CursesRenderer(object):
         """Return the terminal to normal state."""
         curses.endwin()
 
-    def render_field(self, server):
-        """Render the field."""
-        field = self.screen.subwin(22, 32, 1, 1)
-
-        for player in server.alive_players:
-            for point in player.points:
-                field.addch(point[1] + 1, point[0] + 1, ord('#'),
-                        self.player_color(player.number))
-
-        field.border()
+    def snake_char(self, move, next_move):
+        """Return the character for drawing the move."""
+        if move is None: move = '_'
+        if next_move is None: next_move = '_'
+        return self.charmap[move[0] + next_move[0]]
 
     def player_color(self, number):
         """Return color pair for drawing specific player."""
         return curses.color_pair(number + 1) | curses.A_BOLD
 
-    def render_player_stats(self, server):
+    def render_field(self, server):
+        """Render the field."""
+        field = self.screen.subwin(22, 32, 1, 1)
+
+        for player in server.alive_players:
+            for i, point in enumerate(player.points):
+                if i == 0:
+                    char = self.snake_char('_', player.get_move(0))
+                else:
+                    char = self.snake_char(player.get_move(i - 1),
+                            player.get_move(i))
+                field.addch(point[1] + 1, point[0] + 1, char,
+                        self.player_color(player.number))
+
+        field.border()
+
+    def format_player_info(self, player):
+        """Format the information about the player."""
+        stats = 'AVG:{:.2f} MAX:{:.2f}'.format(player.avg_step_time,
+                player.max_step_time)
+        title = '{}:{}'.format(player.number, player.title)
+        msg = 'MSG:{}'.format(player.msg) if player.is_alive\
+                else 'Died at turn {}'.format(player.steps)
+
+        return '{} {} {}'.format(title, stats, msg)
+
+    def render_player_info(self, server):
         """Render the information about the players."""
-        stats_box = self.screen.subwin(5, 70, 23, 1)
+        stats_box = self.screen.subwin(7, 70, 23, 1)
 
+        stats_box.addstr(1, 2, 'Turn {}:'.format(server.turn_count))
         for i, player in sorted(server.players.items()):
-            if player.is_alive:
-                state = '{}:{} AVG:{:.2f} MAX:{:.2f} MSG:{}'.format(
-                        i, player.title, player.avg_step_time,
-                        player.max_step_time, player.msg)
-            else:
-                state = '{}:{} Dead at step {}'.format(
-                    i, player.title, player.steps)
-
-            stats_box.addstr(i + 1, 2, state, self.player_color(i))
-            stats_box.chgat(i + 1, 2, self.player_color(i))
+            stats_box.addstr(i + 2, 2, self.format_player_info(player),
+                    self.player_color(i))
 
         stats_box.border()
 
@@ -65,52 +98,5 @@ class CursesRenderer(object):
         """Render the game state."""
         self.screen.erase()
         self.render_field(server)
-        self.render_player_stats(server)
+        self.render_player_info(server)
         self.screen.refresh()
-
-
-"""
-class TTYServer(TronServer):
-
-    PLAYER_COLORS = [colored.red, colored.green, colored.yellow, colored.blue]
-
-    def __init__(self, framerate=5):
-        TronServer.__init__(self)
-        self.framerate = framerate
-
-    def render_field(self):
-
-        def format_cell(c):
-            if c == 0: return ' '
-            if 8 <= c < 12: c -= 4
-            if 4 <= c < 8: c -= 4
-            if 0 <= c < 4:
-                return self.PLAYER_COLORS[c]('#').color_str
-            return ' '
-
-        def pg(c):
-            return unichr(0x2500 + c).encode('utf-8')
-
-        print pg(0x54) + pg(0x50) * 30 + pg(0x57)
-        for start in range(0, 20 * 64, 64):
-            print pg(0x51) + \
-                    ''.join(map(format_cell, self.grid[start:start + 30]))\
-                    + pg(0x51)
-        print pg(0x5a) + pg(0x50) * 30 + pg(0x5d)
-
-    def render_player_stats(self):
-        for i, player in self.players.items():
-            color = self.PLAYER_COLORS[i]
-            if player.is_alive:
-                print color()
-            else:
-                print color('{}:{} Dead at step {}'.format(
-                    i, player.title, player.steps))
-
-    def render(self):
-        for i in xrange(20):
-            print
-        self.render_field()
-        print
-        self.render_player_stats()
-"""

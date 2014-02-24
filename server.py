@@ -47,9 +47,9 @@ class PlayerProgram(PlayerInfo):
         except IndexError:
             return None
 
-        last, prev = map(self.grid.coords2index, last, prev)
+        last, prev = map(lambda pt: TronGrid.coords2index(*pt), [last, prev])
         offset = last - prev
-        r_dir = {off: dir for dir, off in self.grid.DIRECTIONS.items()}
+        r_dir = {off: dir for dir, off in TronGrid.DIRECTIONS.items()}
         return r_dir.get(offset, None)
 
     @property
