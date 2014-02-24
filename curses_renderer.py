@@ -31,6 +31,12 @@ class CursesRenderer(object):
     def render_field(self, server):
         """Render the field."""
         field = self.screen.subwin(22, 32, 1, 1)
+
+        for player in server.alive_players:
+            for point in player.points:
+                field.addch(point[1] + 1, point[0] + 1, ord('#'),
+                        self.player_color(player.number))
+
         field.border()
 
     def player_color(self, number):
