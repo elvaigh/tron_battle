@@ -12,6 +12,11 @@ def tg():
     return TronGrid()
 
 
+@pytest.fixture
+def center():
+    return TronGrid.coords2index(15, 10)
+
+
 def test_constructor(tg):
     assert tg.grid.count(0) == 600
 
@@ -33,11 +38,36 @@ def test_bfs_probe_center(tg):
     assert res.objects == {-1}
 
 
-def test_bsf_probe_objs(tg):
+def test_ray_probe_center(tg, center):
+
+    def check(dir, width, m, d, e):
+        res = tg.ray_probe(center, tg.DIRECTIONS[dir], width)
+        assert res.closest_obstacle_d == d + 1
+        assert res.closest_obstacle == -1
+        assert res.max_distance == m
+        assert res.empty_count == e
+        assert res.objects == {-1}
+
+    check('UP', 0, 10, 10, 10)
+    check('DOWN', 0, 9, 9, 9)
+    check('LEFT', 0, 15, 15, 15)
+    check('RIGHT', 0, 14, 14, 14)
+
+    check('UP', 5, 10, 10, 50)
+    check('UP', 10, 10, 10, 100)
+    check('DOWN', 5, 9, 9, 41)
+    check('DOWN', 10, 9, 9, 81)
+    check('LEFT', 5, 15, 15, 113)
+    check('LEFT', 10, 15, 10, 200)
+    check('RIGHT', 5, 14, 14, 98)
+    check('RIGHT', 10, 14, 10, 180)
+
+
+def test_bsf_probe_objs(tg, center):
     tg.put(10, 8, 1)
     tg.put(5, 19, 2)
 
-    res = tg.bfs_probe(tg.coords2index(15, 10))
+    res = tg.bfs_probe(center)
 
     assert res.closest_obstacle_d == 7
     assert res.closest_obstacle == 1
@@ -47,6 +77,20 @@ def test_bsf_probe_objs(tg):
     assert res.obj2dist[1] == 7
     assert res.obj2dist[2] == 19
     assert res.obj2dist[-1] == 10
+
+
+def test_ray_probe_objs(tg, center):
+    tg.put(20, 10, 1)
+    tg.put(25, 10, 2)
+    tg.put(25, 13, 3)
+
+    res = tg.ray_probe(center, tg.DIRECTIONS['RIGHT'], 0)
+    assert res.objects == {1}
+    assert res.obj2dist[1] == 5
+
+    res = tg.ray_probe(center, tg.DIRECTIONS['RIGHT'], 4)
+    assert res.objects == {1, 3, -1}
+    assert res.obj2dist[3] == 10
 
 
 @pytest.fixture

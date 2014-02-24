@@ -116,6 +116,22 @@ def bfs_probe_limit10():
     t.bfs_probe(t.coords2index(15, 10), limit=10)
 
 
+@timed(100)
+def ray_probe_empty0_100():
+    """Ray probe 100 times from the center to the right width = 0."""
+    t = tg()
+    for i in xrange(100):
+        t.ray_probe(t.coords2index(15, 10), t.DIRECTIONS['RIGHT'])
+
+
+@timed(100)
+def ray_probe_empty5_100():
+    """Ray probe 100 times from the center to the right width = 5."""
+    t = tg()
+    for i in xrange(100):
+        t.ray_probe(t.coords2index(15, 10), t.DIRECTIONS['RIGHT'], 5)
+
+
 if __name__ == '__main__':
     copy_100()
     replace1_100()
@@ -125,3 +141,5 @@ if __name__ == '__main__':
     bfs_probe_empty()
     bfs_probe_box()
     bfs_probe_limit10()
+    ray_probe_empty0_100()
+    ray_probe_empty5_100()
