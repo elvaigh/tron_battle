@@ -3,20 +3,32 @@ Grid -- the field of the Tron Battle.
 """
 
 from array import array
+from collections import defaultdict
 from copy import deepcopy, copy
 
 
 class ProbeResult(object):
     """Result of a probe."""
 
-    def __init__(self, closest_obstacle_d, closest_obstacle, steps,
-            empty_count, values, pois_reached):
-        self.closest_obstacle_d = closest_obstacle_d
-        self.closest_obstacle = closest_obstacle
+    #: Value of the closest obstacle
+    closest_obstacle = None
+    #: Distance to the closest obstacle
+    closest_obstacle_d = None
+
+    def __init__(self, steps, empty_count, obj2dist, pois_reached):
         self.max_distance = steps
         self.empty_count = empty_count
-        self.values = values
+        self.obj2dist = obj2dist
+        self.objects = set(obj2dist.keys())
         self.pois_reached = pois_reached
+
+        self.dist2obj = defaultdict(list)
+        for obj, dist in obj2dist.items():
+            self.dist2obj[dist].append(obj)
+
+        if self.dist2obj:
+            self.closest_obstacle_d = min(self.dist2obj.keys())
+            self.closest_obstacle = self.dist2obj[self.closest_obstacle_d][0]
 
 
 class TronGrid(object):
@@ -114,19 +126,14 @@ class TronGrid(object):
                         new_origins.append(idx)
             origins = new_origins
 
-        # print self
-        # print new_origins
-        # raw_input()
-
     def bfs_probe(self, start_idx, pois={}, limit=None, empty=0):
         """See how far we can get from the ``start_idx``.
 
         Returns the information about the surroundings of that point:
 
-            * Distance and values of the closest obstacle,
             * Max distance walked,
             * Number of passed positions that are empty,
-            * List of values encountered,
+            * List of objects encountered and the distances to them,
             * List of POIs reached (taken out of ``pois`` set).
 
         If ``limit`` is specified, don't probe beyond that many steps.
@@ -138,9 +145,7 @@ class TronGrid(object):
         empty_count = 0
         pois_left = set(pois)
         pois_reached = set()
-        values = set()
-        closest_obstacle = None
-        closest_obstacle_d = None
+        obj2dist = {}
         marker = 32000
 
         while origins:
@@ -158,14 +163,12 @@ class TronGrid(object):
                         new_origins.append(idx)
                         empty_count += 1
                     elif value != marker:
-                        if closest_obstacle is None:
-                            closest_obstacle = value
-                            closest_obstacle_d = steps + 1
-                        values.add(value)
+                        if value not in obj2dist:
+                            obj2dist[value] = steps + 1
                     if idx in pois_left:
                         pois_reached.add(idx)
                         pois_left.remove(idx)
             origins = new_origins
+        print obj2dist
 
-        return ProbeResult(closest_obstacle_d, closest_obstacle, steps,
-                empty_count, values, pois_reached)
+        return ProbeResult(steps, empty_count, obj2dist, pois_reached)

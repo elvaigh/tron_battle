@@ -30,7 +30,7 @@ def test_bfs_probe_center(tg):
     assert res.closest_obstacle == -1
     assert res.max_distance == 25
     assert res.empty_count == 599  # start point is never counted
-    assert res.values == {-1}
+    assert res.objects == {-1}
 
 
 def test_bsf_probe_objs(tg):
@@ -43,7 +43,10 @@ def test_bsf_probe_objs(tg):
     assert res.closest_obstacle == 1
     assert res.max_distance == 25
     assert res.empty_count == 597  # subtract two points and start point
-    assert res.values == {1, 2, -1}
+    assert res.objects == {1, 2, -1}
+    assert res.obj2dist[1] == 7
+    assert res.obj2dist[2] == 19
+    assert res.obj2dist[-1] == 10
 
 
 @pytest.fixture
@@ -79,7 +82,7 @@ def test_bsf_probe_box1(tg_box1):
     assert res.closest_obstacle == tg_box1.body_of(0)
     assert res.max_distance == 13
     assert res.empty_count == (9 * 19) - 1
-    assert res.values == {tg_box1.body_of(0)}
+    assert res.objects == {tg_box1.body_of(0)}
 
 
 def test_bsf_probe_box1_limit(tg_box1):
@@ -89,7 +92,7 @@ def test_bsf_probe_box1_limit(tg_box1):
     assert res.closest_obstacle is None
     assert res.max_distance == 3
     assert res.empty_count == 24
-    assert res.values == set()
+    assert res.objects == set()
 
 
 def test_bsf_probe_box1_in(tg_box1_in):
@@ -99,7 +102,7 @@ def test_bsf_probe_box1_in(tg_box1_in):
     assert res.closest_obstacle == tg_box1_in.body_of(0)
     assert res.max_distance == 13
     assert res.empty_count == (9 * 19) - 2
-    assert res.values == {tg_box1_in.body_of(0), tg_box1_in.head_of(0)}
+    assert res.objects == {tg_box1_in.body_of(0), tg_box1_in.head_of(0)}
 
 
 def test_bsf_probe_box1_out(tg_box1_out):
@@ -109,7 +112,7 @@ def test_bsf_probe_box1_out(tg_box1_out):
     assert res.closest_obstacle == tg_box1_out.body_of(0)
     assert res.max_distance == 13
     assert res.empty_count == (9 * 19) - 1
-    assert res.values == {tg_box1_out.body_of(0)}
+    assert res.objects == {tg_box1_out.body_of(0)}
 
 
 def test_bfs_probe_pois(tg_box1):
