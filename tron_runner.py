@@ -20,10 +20,11 @@ class MultigameRenderer(object):
 
     def __exit__(self, *_):
         print '{} Games finished:'.format(self.games)
+        total_score = sum(self.player_scores)
         for i, score in enumerate(self.player_scores):
-            print '{}:{} won {} times ({:.2f}%)'.format(
+            print '{}:{} got {} points ({:.2f}%)'.format(
                     i, self.player_titles[i], score,
-                    score * 100.0 / self.games)
+                    score * 100.0 / total_score)
 
     def render(self, server):
         """Remember the players and the score if it's last turn."""
@@ -31,16 +32,15 @@ class MultigameRenderer(object):
             players = server.players_list
             player_titles = [player.title for player in players]
 
-            if self.player_titles:
-                if player_titles != player_titles:
-                    raise Exception('Player titles changed in progress.')
-                for i, player in enumerate(players):
-                    if player.is_alive:
-                        self.player_scores[i] += 1
-            else:
+            if not self.player_titles:
                 self.player_titles = player_titles
-                self.player_scores = [1 if player.is_alive else 0
-                        for player in players]
+                self.player_scores = [0 for player in players]
+
+            ps = sorted([(p.is_alive, p.steps, p) for p in players])
+            for i, p_s in enumerate(ps):
+                player = p_s[2]
+                player.score_inc = 2 ** (i - 1) if i > 0 else 0
+                self.player_scores[player.number] += player.score_inc
 
             self.games += 1
             print 'Game {} finished.'.format(self.games)
@@ -50,8 +50,10 @@ class MultigameRenderer(object):
                 else:
                     state = 'died at turn {}'.format(player.steps)
 
-                print '{}:{} {} [{} total victories]'.format(
-                            i, player.title, state, self.player_scores[i])
+                print '{}:{} {} [+{} = {} total points]'.format(
+                        i, player.title, state,
+                        player.score_inc, self.player_scores[i])
+                del player.score_inc
             print
 
 
