@@ -33,6 +33,9 @@ class ParamDescr(object):
         for drop in ['name', 'letter']:
             if drop in kw:
                 del kw[drop]
+        if self.kw['type'] == bool:
+            kw['action'] = 'store_true'
+            del kw['type']
         return kw
 
 
