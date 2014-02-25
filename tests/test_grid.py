@@ -85,6 +85,8 @@ def test_bsf_probe_objs(tg, center):
     assert res.obj2dist[1] == 7
     assert res.obj2dist[2] == 19
     assert res.obj2dist[-1] == 10
+    assert res.obj2pos[1] == tg.coords2index(10, 8)
+    assert res.obj2pos[2] == tg.coords2index(5, 19)
 
 
 def test_ray_probe_objs(tg, center):
@@ -95,10 +97,12 @@ def test_ray_probe_objs(tg, center):
     res = tg.ray_probe(center, tg.DIRECTIONS['RIGHT'], 0)
     assert res.objects == {1}
     assert res.obj2dist[1] == 5
+    assert res.obj2pos[1] == tg.coords2index(20, 10)
 
     res = tg.ray_probe(center, tg.DIRECTIONS['RIGHT'], 4)
     assert res.objects == {1, 3, -1}
     assert res.obj2dist[3] == 10
+    assert res.obj2pos[3] == tg.coords2index(25, 13)
 
 
 @pytest.fixture

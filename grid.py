@@ -15,12 +15,13 @@ class ProbeResult(object):
     #: Distance to the closest obstacle
     closest_obstacle_d = None
 
-    def __init__(self, steps, empty_count, obj2dist, pois_reached):
+    def __init__(self, steps, empty_count, obj2dist, pois_reached, obj2pos):
         self.max_distance = steps
         self.empty_count = empty_count
         self.obj2dist = obj2dist
         self.objects = set(obj2dist.keys())
         self.pois_reached = pois_reached
+        self.obj2pos = obj2pos
 
         self.dist2obj = defaultdict(list)
         for obj, dist in obj2dist.items():
@@ -146,6 +147,7 @@ class TronGrid(object):
         pois_left = set(pois)
         pois_reached = set()
         obj2dist = {}
+        obj2pos = {}
         marker = 32000
 
         while origins:
@@ -165,12 +167,14 @@ class TronGrid(object):
                     elif value != marker:
                         if value not in obj2dist:
                             obj2dist[value] = steps
+                            obj2pos[value] = idx
                     if idx in pois_left:
                         pois_reached.add(idx)
                         pois_left.remove(idx)
             origins = new_origins
 
-        return ProbeResult(steps - 1, empty_count, obj2dist, pois_reached)
+        return ProbeResult(steps - 1, empty_count, obj2dist, pois_reached,
+                obj2pos)
 
     def ray_probe(self, start_idx, direction, width=0, limit=None):
         """See how far we can go in the given direction.
@@ -189,6 +193,7 @@ class TronGrid(object):
         add_pix = 0.0
         empty_count = 0
         obj2dist = {}
+        obj2pos = {}
 
         while front:
             steps += 1
@@ -208,8 +213,9 @@ class TronGrid(object):
                 else:
                     if value not in obj2dist:
                         obj2dist[value] = steps
+                        obj2pos[value] = pt
 
             empty_count += len(front)
             # print steps, front, empty_count
 
-        return ProbeResult(steps - 1, empty_count, obj2dist, {})
+        return ProbeResult(steps - 1, empty_count, obj2dist, {}, obj2pos)
