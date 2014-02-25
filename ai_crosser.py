@@ -15,10 +15,13 @@ class AICrosser(AIWanderer):
         if others there:
             go straight as far as possible
         else:
-            wander
+            fill (uses wanderer AI)
     else:
         go straight as far as possible
     """
+
+    # Some config for wanderer
+    obstacle_fear = -3  # slightly stick to obstacles in fill mode
 
     OPEN = 0
     POCKET = 1
@@ -33,7 +36,7 @@ class AICrosser(AIWanderer):
             LONELY - don't see others.
         """
         pr = self.grid.bfs_probe(self.my_pos, limit=50)
-        self.full_bfs_probe = pr
+        self.full_bfs = pr
         for i in xrange(4):
             if self.grid.head_of(i) in pr.objects:
                 if pr.empty_count >= self.pocket_threshold:
@@ -52,7 +55,8 @@ class AICrosser(AIWanderer):
             return False
 
         pr = self.grid.bfs_probe(new_pos, limit=self.depth_limit)
-        return pr.empty_count > self.full_bfs_probe.empty_count * 0.3
+        threshold = self.full_bfs.empty_count * self.claustrophobia / 100.0
+        return pr.empty_count > threshold
 
     def choose_direction(self):
         """Look for good straight directions."""
@@ -67,14 +71,11 @@ class AICrosser(AIWanderer):
 
     def go_straight(self):
         """Go straight to the farthest open side."""
+        self.choose_direction()
         if self.check_direction():
             return self.direction
         else:
-            self.choose_direction()
-            if self.check_direction():
-                return self.direction
-            else:
-                return self.go_wander()
+            return self.go_wander()
 
     def go(self):
         """Act depending on the phase of the game."""
@@ -88,16 +89,17 @@ class AICrosser(AIWanderer):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=AICrosser.__doc__)
-    parser.add_argument('--depth-limit', '-l', type=int, default=20,
+    parser.add_argument('--depth-limit', '-l', type=int, default=30,
             metavar='N', help='Depth of the search for wandering.')
     parser.add_argument('--distance-love', '-d', type=int, default=100,
             metavar='N', help='Relative weight of maximal distance.')
-    parser.add_argument('--obstacle-fear', '-o', type=int, default=0,
+    parser.add_argument('--space-love', '-s', type=int, default=30,
             metavar='N',
-            help='Relative weight of distance to closest obstacle.')
-    parser.add_argument('--space-love', '-s', type=int, default=0,
-            metavar='N', help='Relative weight of amount of space.')
-    parser.add_argument('--ray-width', '-w', type=int, default=4,
+            help='Relative weight of amount of space in fill mode.')
+    parser.add_argument('--claustrophobia', '-c', type=int, default=85,
+            metavar='N',
+            help='Minimum % of space to keep going straight.')
+    parser.add_argument('--ray-width', '-w', type=int, default=6,
             metavar='N', help='Width of the straightor scan.')
     parser.add_argument('--pocket-threshold', '-t', type=int, default=100,
             metavar='N', help='Pocket threshold.')
