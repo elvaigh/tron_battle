@@ -79,7 +79,8 @@ class CursesRenderer(object):
                 player.max_step_time)
         title = '{}:{}'.format(player.number, player.title)
         msg = 'MSG:{}'.format(player.msg) if player.is_alive\
-                else 'Died at turn {}'.format(player.steps)
+                else 'Died at turn {} (MSG:{})'.format(player.steps,
+                        player.msg)
 
         return '{} {} {}'.format(title, stats, msg)
 

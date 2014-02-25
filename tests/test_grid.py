@@ -63,6 +63,14 @@ def test_ray_probe_center(tg, center):
     check('RIGHT', 10, 14, 10, 180)
 
 
+def test_bsf_probe_self(tg, center):
+    tg[center] = 1
+
+    res = tg.bfs_probe(center)
+
+    assert 1 not in res.objects
+
+
 def test_bsf_probe_objs(tg, center):
     tg.put(10, 8, 1)
     tg.put(5, 19, 2)
