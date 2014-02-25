@@ -2,9 +2,7 @@
 Tron Battle AI. Doesn't go into obstacles if it can.
 """
 
-import argparse
-
-from client import TronClient  # @include(client.py)
+from client import run_ai  # @include(client.py)
 from ai_base import AIBase  # @include(ai_base.py)
 
 
@@ -14,6 +12,23 @@ class AIWanderer(AIBase):
     Uses result of the ``bfs_probe`` and weight coefficients to determine
     the most interesting direction.
     """
+
+    # Configuration
+    depth_limit = 20
+    distance_love = 100
+    obstacle_fear = 100
+    space_love = 100
+
+    def __init__(self):
+        super(AIWanderer, self).__init__()
+        self.add_param('depth_limit', 'l',
+                help='Depth of the search.')
+        self.add_param('distance_love', 'd',
+                help='Relative weight of maximal distance.')
+        self.add_param('obstacle_fear', 'o',
+                help='Relative weight of distance to closest obstacle.')
+        self.add_param('space_love', 's',
+                help='Relative weight of amount of space.')
 
     def go_wander(self):
         """Find the direction with least interference."""
@@ -38,17 +53,4 @@ class AIWanderer(AIBase):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=AIWanderer.__doc__)
-    parser.add_argument('--depth-limit', '-l', type=int, default=20,
-            metavar='N', help='Depth of the search.')
-    parser.add_argument('--distance-love', '-d', type=int, default=100,
-            metavar='N', help='Relative weight of maximal distance.')
-    parser.add_argument('--obstacle-fear', '-o', type=int, default=100,
-            metavar='N',
-            help='Relative weight of distance to closest obstacle.')
-    parser.add_argument('--space-love', '-s', type=int, default=100,
-            metavar='N', help='Relative weight of amount of space.')
-    config = parser.parse_args()
-
-    tc = TronClient(AIWanderer(config))
-    tc.run()
+    run_ai(AIWanderer)

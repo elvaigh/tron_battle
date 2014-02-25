@@ -8,6 +8,14 @@ from grid import TronGrid  # @include(grid.py)
 from player import PlayerInfo  # @include(player.py)
 
 
+def run_ai(ai_class):
+    """Run AI class as a player."""
+    ai = ai_class()
+    ai.configure()
+    tc = TronClient(ai)
+    tc.run()
+
+
 class TronClient(object):
 
     def __init__(self, handler):

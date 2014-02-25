@@ -2,9 +2,7 @@
 Tron Battle AI. Tries to cross the field while it can, then wanders.
 """
 
-import argparse
-
-from client import TronClient  # @include(client.py)
+from client import run_ai  # @include(client.py)
 from ai_wanderer import AIWanderer  # @include(ai_wanderer.py)
 
 
@@ -20,8 +18,23 @@ class AICrosser(AIWanderer):
         go straight as far as possible
     """
 
-    # Some config for wanderer
-    obstacle_fear = -3  # slightly stick to obstacles in fill mode
+    # Wanderer config overrides
+    depth_limit = 30
+    obstacle_fear = -3
+    space_love = 30
+
+    # Crosser config
+    ray_width = 6
+    pocket_threshold = 100
+    claustrophobia = 85
+
+    def __init__(self):
+        super(AICrosser, self).__init__()
+        self.add_param('claustrophobia', 'c',
+                help='Minimum %% of space to keep going straight.')
+        self.add_param('pocket_threshold', 't',
+                help='Available space to decide that we\'re in a pocket.')
+        self.add_param('ray_width', 'w', help='Width of the ray scan.')
 
     OPEN = 0
     POCKET = 1
@@ -88,22 +101,4 @@ class AICrosser(AIWanderer):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=AICrosser.__doc__)
-    parser.add_argument('--depth-limit', '-l', type=int, default=30,
-            metavar='N', help='Depth of the search for wandering.')
-    parser.add_argument('--distance-love', '-d', type=int, default=100,
-            metavar='N', help='Relative weight of maximal distance.')
-    parser.add_argument('--space-love', '-s', type=int, default=30,
-            metavar='N',
-            help='Relative weight of amount of space in fill mode.')
-    parser.add_argument('--claustrophobia', '-c', type=int, default=85,
-            metavar='N',
-            help='Minimum % of space to keep going straight.')
-    parser.add_argument('--ray-width', '-w', type=int, default=6,
-            metavar='N', help='Width of the straightor scan.')
-    parser.add_argument('--pocket-threshold', '-t', type=int, default=100,
-            metavar='N', help='Pocket threshold.')
-    config = parser.parse_args()
-
-    tc = TronClient(AICrosser(config))
-    tc.run()
+    run_ai(AICrosser)
