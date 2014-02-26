@@ -161,10 +161,11 @@ class MiniMax(object):
         """Aggregate the value from the states below this."""
         next_is_me = state.next_player == self.my_number
         if state.next_states:
+            options = [ns.value for ns in state.next_states]
             if next_is_me:
-                state.value = max(ns.value for ns in state.next_states)
+                state.value = max(options)
             else:
-                state.value = min(ns.value for ns in state.next_states)
+                state.value = min(options)
         else:
             if next_is_me:
                 state.value = -100  # dead end
