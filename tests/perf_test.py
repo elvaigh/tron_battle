@@ -11,6 +11,9 @@ sys.path.append(dn(dn(ap(__file__))))
 sys.path.append(dn(ap(__file__)))
 
 from test_grid import tg, tg_box1
+from test_minimax import tg as mm_tg, player as mm_player
+
+from minimax import MiniMax
 
 
 TEMPLATE = '{name}\n\tx {count} = {msecs:.3f} ms, average = {once:.3f} {unit}'
@@ -155,6 +158,16 @@ def ray_probe_l5_100():
         t.ray_probe(t.coords2index(15, 10), t.DIRECTIONS['RIGHT'], 10, limit=5)
 
 
+@timed(30)
+def mm_find_best():
+    """MiniMax find best move."""
+    t = mm_tg()
+    t.vline(3, 0, 15, t.body_of(1))
+
+    mm = MiniMax(t, mm_player())
+    mm.find_best_move()
+
+
 if __name__ == '__main__':
     copy_100()
     replace1_100()
@@ -168,3 +181,4 @@ if __name__ == '__main__':
     ray_probe_empty5_100()
     ray_probe_box10_100()
     ray_probe_l5_100()
+    mm_find_best()

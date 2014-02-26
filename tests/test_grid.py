@@ -21,6 +21,30 @@ def test_constructor(tg):
     assert tg.grid.count(0) == 600
 
 
+def test_vline(tg):
+    tg.vline(10, 5, 15, 1)
+
+    for y in xrange(5, 16):
+        assert tg.get(10, y) == 1
+        assert tg.get(11, y) == 0
+        assert tg.get(9, y) == 0
+
+    assert tg.get(10, 4) == 0
+    assert tg.get(10, 16) == 0
+
+
+def test_hline(tg):
+    tg.hline(10, 5, 25, 2)
+
+    for x in xrange(5, 26):
+        assert tg.get(x, 10) == 2
+        assert tg.get(x, 11) == 0
+        assert tg.get(x, 9) == 0
+
+    assert tg.get(4, 10) == 0
+    assert tg.get(26, 10) == 0
+
+
 def test_bfs_fill(tg):
     tg.bfs_fill(42, [0])
 

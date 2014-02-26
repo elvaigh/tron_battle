@@ -108,6 +108,16 @@ class TronGrid(object):
     def get(self, x, y):
         return self.grid[self.coords2index(x, y)]
 
+    def vline(self, x, y0, y1, value):
+        """Vertical line."""
+        for y in xrange(y0, y1 + 1):
+            self.put(x, y, value)
+
+    def hline(self, y, x0, x1, value):
+        """Horizontal line."""
+        for x in xrange(x0, x1 + 1):
+            self.put(x, y, value)
+
     def replace(self, src, dst):
         for i, value in enumerate(self.grid):
             if value == src:
