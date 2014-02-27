@@ -140,8 +140,8 @@ class TronGrid(object):
                     grid[pos] = value
                     wave.append(pos)
 
-    def bfs_probe(self, start_idx, pois={}, limit=None):
-        """See how far we can get from the ``start_idx``.
+    def bfs_probe(self, start_pos, pois={}, limit=None):
+        """See how far we can get from the ``start_pos``.
 
         Returns the information about the surroundings of that point:
 
@@ -152,16 +152,15 @@ class TronGrid(object):
 
         If ``limit`` is specified, don't probe beyond that many steps.
         """
+        marker = 32000
         directions = self.DIRECTIONS.values()
         grid = copy(self.grid)  # Don't change the original grid.
-        origins = [start_idx]
+        origins = [start_pos]
         steps = 0
         empty_count = 0
-        pois_left = set(pois)
         pois_reached = set()
         obj2dist = {}
         obj2pos = {}
-        marker = 32000
 
         while origins:
             steps += 1
@@ -170,36 +169,37 @@ class TronGrid(object):
             new_origins = []
             for origin in origins:
                 for d in directions:
-                    idx = origin + d
-                    if idx == start_idx: continue
-                    value = grid[idx]
-                    if value == 0:
-                        grid[idx] = marker
-                        new_origins.append(idx)
+                    pos = origin + d
+                    if pos == start_pos: continue
+                    value = grid[pos]
+                    if value == marker:
+                        pass
+                    elif value == 0:
+                        grid[pos] = marker
+                        new_origins.append(pos)
                         empty_count += 1
-                    elif value != marker:
+                        if pos in pois:
+                            pois_reached.add(pos)
+                    else:
                         if value not in obj2dist:
                             obj2dist[value] = steps
-                            obj2pos[value] = idx
-                    if idx in pois_left:
-                        pois_reached.add(idx)
-                        pois_left.remove(idx)
+                            obj2pos[value] = pos
             origins = new_origins
 
         return ProbeResult(steps - 1, empty_count, obj2dist, pois_reached,
                 obj2pos)
 
-    def ray_probe(self, start_idx, direction, width=0, limit=None):
+    def ray_probe(self, start_pos, direction, width=0, limit=None):
         """See how far we can go in the given direction.
 
-        :param int start_idx: Start point.
+        :param int start_pos: Start point.
         :param int direction: Direction (see ``TronGrid.DIRECTIONS``).
         :param int width: How much the ray opens per 10 pixels (maximum 10).
         :param int limit: Limit for the scanning distance.
 
         :return: ``ProbeResult`` with results of the scan.
         """
-        front = [start_idx]
+        front = [start_pos]
         open_directions = [dir for dir in self.DIRECTIONS.values()
                 if dir != direction and dir != -direction]
         steps = 0

@@ -109,7 +109,7 @@ def copy_100():
 def bfs_probe_empty():
     """BFS probe in the empty grid from the center."""
     t = tg()
-    t.bfs_probe(t.coords2index(15, 10))
+    t.bfs_probe(t.coords2index(15, 10), pois={3, 6})
 
 
 @timed(500)
