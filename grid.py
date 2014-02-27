@@ -155,6 +155,7 @@ class TronGrid(object):
         marker = 32000
         directions = self.DIRECTIONS.values()
         grid = copy(self.grid)  # Don't change the original grid.
+        grid[start_pos] = marker
         origins = [start_pos]
         steps = 0
         empty_count = 0
@@ -170,7 +171,6 @@ class TronGrid(object):
             for origin in origins:
                 for d in directions:
                     pos = origin + d
-                    if pos == start_pos: continue
                     value = grid[pos]
                     if value == marker:
                         pass
