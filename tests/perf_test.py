@@ -160,12 +160,12 @@ def ray_probe_l5_100():
 
 @timed(30)
 def mm_find_best():
-    """MiniMax find best move."""
+    """MiniMax find best move (max_layers=3)."""
     t = mm_tg()
     t.vline(3, 0, 15, t.body_of(1))
 
     mm = MiniMax(t, mm_player())
-    mm.find_best_move()
+    mm.find_best_move(max_layers=3)
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ Grid -- the field of the Tron Battle.
 """
 
 from array import array
-from collections import defaultdict
+from collections import defaultdict, deque
 from copy import deepcopy, copy
 
 
@@ -123,19 +123,22 @@ class TronGrid(object):
             if value == src:
                 self.grid[i] = dst
 
-    def bfs_fill(self, value, origins, empty=0):
-        directions = self.DIRECTIONS.values()
-        grid = self.grid
+    def neighbours_of(self, pos):
+        """Return the list of the neighbours of a position."""
+        return [pos - 64, pos - 1, pos + 1, pos + 64]
 
-        while origins:
-            new_origins = []
-            for origin in origins:
-                for d in directions:
-                    idx = origin + d
-                    if grid[idx] == empty:
-                        grid[idx] = value
-                        new_origins.append(idx)
-            origins = new_origins
+    def bfs_fill(self, value, origins, empty=0):
+        grid = self.grid
+        directions = self.DIRECTIONS.values()
+        wave = deque(origins)
+
+        while wave:
+            origin = wave.popleft()
+            for dir in directions:
+                pos = origin + dir
+                if grid[pos] == empty:
+                    grid[pos] = value
+                    wave.append(pos)
 
     def bfs_probe(self, start_idx, pois={}, limit=None):
         """See how far we can get from the ``start_idx``.
@@ -150,7 +153,7 @@ class TronGrid(object):
         If ``limit`` is specified, don't probe beyond that many steps.
         """
         directions = self.DIRECTIONS.values()
-        grid = copy(self.grid)  # This method doesn't change the grid.
+        grid = copy(self.grid)  # Don't change the original grid.
         origins = [start_idx]
         steps = 0
         empty_count = 0
