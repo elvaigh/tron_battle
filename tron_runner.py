@@ -76,7 +76,6 @@ class TronRunner(object):
                 if line.startswith('#'): continue
                 title, command = line.split(':')
                 self.server.add_player(title.strip(), command.strip())
-
         time.sleep(0.05)  # let the players initialize
 
     def run(self):

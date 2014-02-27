@@ -6,10 +6,31 @@ import os
 import random
 import time
 import datetime
+import threading
 from subprocess import Popen, PIPE
 
 from grid import TronGrid
 from player import PlayerInfo
+
+
+class StreamReader(threading.Thread):
+    """Thread that reads a stream."""
+
+    def __init__(self, stream):
+        threading.Thread.__init__(self)
+        self.stream = stream
+        self.returned_lines = 0
+        self.lines = []
+
+    def yield_lines(self):
+        """Yield the lines that have been read but not returned yet."""
+        while self.returned_lines < len(self.lines):
+            yield self.lines[self.returned_lines]
+            self.returned_lines += 1
+
+    def run(self):
+        for line in self.stream.readlines():
+            self.lines.append(line)
 
 
 class PlayerProgram(PlayerInfo):
@@ -26,6 +47,8 @@ class PlayerProgram(PlayerInfo):
         self.points = []
         self.process = Popen(command, shell=True, stdin=PIPE, stdout=PIPE,
                 stderr=PIPE)
+        self.stderr_reader = StreamReader(self.process.stderr)
+        self.stderr_reader.start()
 
     def log(self, msg):
         """Log the message (to the server log)."""
@@ -101,12 +124,15 @@ class PlayerProgram(PlayerInfo):
         if step_time > self.max_step_time:
             self.max_step_time = step_time
         self.log('Received {} (in {} ms)'.format(got, step_time))
+        self.check_stderr()
         return got
 
     def check_stderr(self):
         """Check program stderr and return anything that got there."""
-        # TODO
-        return None
+        for line in list(self.stderr_reader.yield_lines()):
+            if line.endswith('\n'):
+                line = line[:-1]
+            self.log('[ERR] ' + line)
 
     def die(self, msg):
         """Terminate this player."""
@@ -146,6 +172,9 @@ class TronServer(object):
         """Write the message to the log."""
         timestamp = datetime.datetime.now().time().isoformat()
         self.log_fp.write('[{}] {}\n'.format(timestamp, msg))
+        # processing of special commands
+        if '@DUMP' in msg:
+            self.dump_grid()
 
     def find_empty_spot(self):
         """Find an empty point in the field."""
@@ -167,9 +196,16 @@ class TronServer(object):
         x, y = self.find_empty_spot()
         player.move(x, y, x, y)
 
+    def dump_grid(self):
+        """Dump the playing field to the log file."""
+        self.log('Dumping the grid')
+        for line in str(self.grid).split('\n'):
+            self.log(line)
+
     def kill_player(self, player, msg):
         """Declare the player dead and remove from the field."""
         player.die(msg)
+        self.dump_grid()
         self.grid.replace(self.grid.body_of(player.number), 0)
         self.grid.replace(self.grid.head_of(player.number), 0)
 
@@ -209,4 +245,6 @@ class TronServer(object):
         self.log('Starting turn {}'.format(self.turn_count))
         for player in self.alive_players:
             self.play_player_turn(player)
+        for player in self.players_list:
+            player.check_stderr()
         self.log('Completed turn {}'.format(self.turn_count))
