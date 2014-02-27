@@ -195,13 +195,16 @@ def test_bsf_probe_box1_out(tg_box1_out):
     assert res.objects == {tg_box1_out.body_of(0)}
 
 
-def test_bfs_probe_pois(tg_box1):
+def test_bfs_probe_get_step(tg_box1):
     c2i = tg_box1.coords2index
-    right = c2i(16, 10)
     left = c2i(14, 10)
-    up = c2i(15, 9)
+    right = c2i(17, 10)
+    up = c2i(15, 7)
     out = c2i(1, 1)
 
-    res = tg_box1.bfs_probe(c2i(15, 10), pois={right, left, up, out})
+    res = tg_box1.bfs_probe(c2i(15, 10))
 
-    assert res.pois_reached == {left, right, up}
+    assert res.get_pos_step(left) == 1
+    assert res.get_pos_step(right) == 2
+    assert res.get_pos_step(up) == 3
+    assert res.get_pos_step(out) is None

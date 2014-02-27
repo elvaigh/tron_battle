@@ -15,13 +15,13 @@ class ProbeResult(object):
     #: Distance to the closest obstacle
     closest_obstacle_d = None
 
-    def __init__(self, steps, empty_count, obj2dist, pois_reached, obj2pos):
+    def __init__(self, steps, empty_count, obj2dist, obj2pos, layers):
         self.max_distance = steps
         self.empty_count = empty_count
         self.obj2dist = obj2dist
         self.objects = set(obj2dist.keys())
-        self.pois_reached = pois_reached
         self.obj2pos = obj2pos
+        self.layers = layers
 
         self.dist2obj = defaultdict(list)
         for obj, dist in obj2dist.items():
@@ -30,6 +30,16 @@ class ProbeResult(object):
         if self.dist2obj:
             self.closest_obstacle_d = min(self.dist2obj.keys())
             self.closest_obstacle = self.dist2obj[self.closest_obstacle_d][0]
+
+    def get_pos_step(self, pos):
+        """Return the step on which ``pos`` was passed.
+
+        Returns None if ``pos`` was not passed.
+        """
+        for step, layer in enumerate(self.layers):
+            if pos in layer:
+                return step
+        return None
 
 
 class TronGrid(object):
@@ -142,7 +152,7 @@ class TronGrid(object):
                     grid[pos] = value
                     add_to_wave(pos)
 
-    def bfs_probe(self, start_pos, pois={}, limit=None):
+    def bfs_probe(self, start_pos, limit=None):
         """See how far we can get from the ``start_pos``.
 
         Returns the information about the surroundings of that point:
@@ -150,7 +160,6 @@ class TronGrid(object):
             * Max distance walked,
             * Number of passed positions that are empty,
             * List of objects encountered and the distances to them,
-            * List of POIs reached (taken out of ``pois`` set).
 
         If ``limit`` is specified, don't probe beyond that many steps.
         """
@@ -161,11 +170,12 @@ class TronGrid(object):
         origins = [start_pos]
         steps = 0
         empty_count = 0
-        pois_reached = set()
         obj2dist = {}
         obj2pos = {}
+        layers = []
 
         while origins:
+            layers.append(origins)
             steps += 1
             if limit is not None and steps > limit:
                 break
@@ -183,8 +193,6 @@ class TronGrid(object):
                         grid[pos] = marker
                         add_new_origin(pos)
                         empty_count += 1
-                        if pos in pois:
-                            pois_reached.add(pos)
                     else:
                         if value not in obj2dist:
                             obj2dist[value] = steps
@@ -192,8 +200,7 @@ class TronGrid(object):
 
             origins = new_origins
 
-        return ProbeResult(steps - 1, empty_count, obj2dist, pois_reached,
-                obj2pos)
+        return ProbeResult(steps - 1, empty_count, obj2dist, obj2pos, layers)
 
     def ray_probe(self, start_pos, direction, width=0, limit=None):
         """See how far we can go in the given direction.
@@ -213,8 +220,10 @@ class TronGrid(object):
         empty_count = 0
         obj2dist = {}
         obj2pos = {}
+        layers = []
 
         while front:
+            layers.append(front)
             steps += 1
             if limit is not None and steps > limit:
                 break
@@ -237,4 +246,4 @@ class TronGrid(object):
             empty_count += len(front)
             # print steps, front, empty_count
 
-        return ProbeResult(steps - 1, empty_count, obj2dist, {}, obj2pos)
+        return ProbeResult(steps - 1, empty_count, obj2dist, obj2pos, layers)
