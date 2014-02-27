@@ -105,21 +105,21 @@ def copy_100():
     return t1
 
 
-@timed(500)
+@timed(1000)
 def bfs_probe_empty():
     """BFS probe in the empty grid from the center."""
     t = tg()
     t.bfs_probe(t.coords2index(15, 10), pois={3, 6})
 
 
-@timed(500)
+@timed(1000)
 def bfs_probe_box():
     """BFS probe from the box in the center."""
     t = tg_box1(tg())
     t.bfs_probe(t.coords2index(15, 10))
 
 
-@timed(500)
+@timed(1000)
 def bfs_probe_limit10():
     """BFS probe with the limit of 10."""
     t = tg()

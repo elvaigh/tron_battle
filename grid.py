@@ -127,18 +127,20 @@ class TronGrid(object):
         """Return the list of the neighbours of a position."""
         return [pos - 64, pos - 1, pos + 1, pos + 64]
 
-    def bfs_fill(self, value, origins, empty=0):
+    def bfs_fill(self, value, origins):
         grid = self.grid
         directions = self.DIRECTIONS.values()
         wave = deque(origins)
+        next_origin = wave.popleft
+        add_to_wave = wave.append
 
         while wave:
-            origin = wave.popleft()
+            origin = next_origin()
             for dir in directions:
                 pos = origin + dir
-                if grid[pos] == empty:
+                if grid[pos] == 0:
                     grid[pos] = value
-                    wave.append(pos)
+                    add_to_wave(pos)
 
     def bfs_probe(self, start_pos, pois={}, limit=None):
         """See how far we can get from the ``start_pos``.
@@ -167,7 +169,10 @@ class TronGrid(object):
             steps += 1
             if limit is not None and steps > limit:
                 break
+
             new_origins = []
+            add_new_origin = new_origins.append
+
             for origin in origins:
                 for d in directions:
                     pos = origin + d
@@ -176,7 +181,7 @@ class TronGrid(object):
                         pass
                     elif value == 0:
                         grid[pos] = marker
-                        new_origins.append(pos)
+                        add_new_origin(pos)
                         empty_count += 1
                         if pos in pois:
                             pois_reached.add(pos)
@@ -184,6 +189,7 @@ class TronGrid(object):
                         if value not in obj2dist:
                             obj2dist[value] = steps
                             obj2pos[value] = pos
+
             origins = new_origins
 
         return ProbeResult(steps - 1, empty_count, obj2dist, pois_reached,
