@@ -4,6 +4,8 @@ Tron Battle
 Tools for making AI Players for Tron Battle
 (http://www.codingame.com/cg/#!ranking:20).
 
+Here's a screenshot:
+
     ┌──────────────────────────────┐
     │                              │
     │                              │
@@ -47,19 +49,13 @@ To create an AI player:
 Note the `# @include(client.py)` comment in the first line. This is needed for
 building a single-file client for using with online Tron Battle.
 
-To test the player (assuming the code is in `ai_lefter.py`):
+To test a player add it to players.conf and run:
 
-    from server import TronServer
-    from curses_renderer import CursesRenderer
-    from tron_runner import TronRunner
+    $ python tron_runner.py
 
-    with CursesRenderer() as renderer:
-        server = TronServer()
-        runner = TronRunner(server, renderer, 10)
-        server.add_player('wanderer 5', 'python ai_wanderer.py 5')
-        server.add_player('wanderer 15', 'python ai_wanderer.py 15')
-        server.add_player('wanderer 45', 'python ai_wanderer.py 45')
-        runner.run()
+Tron runner can run one or several battles and it writes the game into a
+logfile in the current directory. Run it with ``-h`` to get information about
+the command line options.
 
 To make a single script that is usable for the online Tron Battle:
 
